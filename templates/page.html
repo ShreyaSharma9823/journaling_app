@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="stylesheet" href="{% static 'css/page_style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Option 1: Include in HTML -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>    
+    <link href="https://fonts.googleapis.com/css2?family=Cookie&display=swap" rel="stylesheet">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italianno&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins&family=Roboto&family=Playfair+Display&family=Lobster&family=Montserrat&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap" rel="stylesheet">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+</head>    
+      <title>Document</title>
+</head>
+<body>
+     
+    <div class="container d-flex">
+        <div class="side_bar">
+            <div class="side_header d-flex align-items-center justify-content-between">
+            <button id="create_entry_btn" class="create_entry_button " aria-label="Create a new journal entry">
+                <i class="bi bi-plus-circle-fill"></i>
+            </button>
+            <p style="font-family: Cookie,cursive; font-size: 30px; color: rgb(4, 4, 160); text-align: center;padding-top: 10px;">Create Entry</p>
+            </div>
+            <a href="{% url 'logout' %}" class="logout_btn  ">Logout</a>
+            <input id="journal_search" type="text" class="search_bar" placeholder="Search by title or date...">
+            <div id="journal_list" class="journal_list"></div>
+        </div>
+
+        <div class="main_content">
+            <div id="toolbar">
+    <select class="ql-font">
+        <option value="poppins">Poppins</option>
+        <option value="roboto">Roboto</option>
+        <option value="playfair">Playfair</option>
+        <option value="lobster">Lobster</option>
+        <option value="montserrat">Montserrat</option>
+        <option value="Times New Roman">Times New Roman</option>
+        
+    </select>
+        <select class="ql-size">
+            <option value="small"></option>
+            <option value="huge"></option>
+            <option value="large"></option>
+            <option value="normal" selected></option>
+        </select>
+
+        <button class="ql-bold">bold</button>
+        <button class="ql-italic">italic</button>
+        <button class="ql-underline">underline</button>
+        <button class="ql-strike">strike</button>
+        <button class="ql-list" value="ordered">ordered list</button>
+        <button class="ql-list" value="bullet">bullet list</button> 
+           <select class="ql-align"></select>
+        <button class="ql-image"></button>
+        <button class="ql-video"></button>
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+     </div>
+            <div class="entry_content">
+              <input id="journal_title" type="text" class="entry_title " placeholder="Entry Title" autocomplete="off">
+              <input id="journal_date" type="datetime-local" class="entry_date " placeholder="Entry Date">
+              <div id="editor" class="entry_text"></div>
+            </div>
+            </div>
+            <button id="save_journal_btn" class="save_btn btn btn-primary" type="button">Save</button>
+            <script src="{% static 'js/page.js' %}"></script>
+    </div>
+  
+</body>
+</html>

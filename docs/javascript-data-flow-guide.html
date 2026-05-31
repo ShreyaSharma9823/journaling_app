@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Data Flow Guide</title>
+    <style>
+        :root {
+            --bg: #f5f1ea;
+            --paper: #fffdf8;
+            --ink: #1f1a17;
+            --muted: #6f6258;
+            --accent: #1f4ba8;
+            --border: #d8cfc3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            background: linear-gradient(180deg, #ede4d8 0%, var(--bg) 100%);
+            color: var(--ink);
+            line-height: 1.65;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background: var(--paper);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(31, 26, 23, 0.12);
+        }
+
+        h1, h2, h3 {
+            font-family: "Palatino Linotype", Georgia, serif;
+            line-height: 1.2;
+            color: #16233f;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.45rem;
+            margin-top: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.35rem;
+        }
+
+        p, li {
+            font-size: 1.02rem;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        code {
+            background: #f1ebe3;
+            padding: 0.15rem 0.35rem;
+            border-radius: 6px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95em;
+        }
+
+        pre {
+            background: #f6f0e8;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        ul, ol {
+            padding-left: 1.4rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <h1>JavaScript Data Flow Guide</h1>
+        <p class="muted">For the journal app in this project</p>
+
+        <h2>Big Picture</h2>
+        <p>The JavaScript in <code>templates/page.html</code> connects the browser UI, the Django API, and the database. The browser does not save journals directly. It only collects values from the page and sends them to Django. Django validates the data and saves it through the serializer and model.</p>
+
+        <p>Save flow:</p>
+        <ol>
+            <li>User types title, date, and content.</li>
+            <li><code>saveData()</code> reads those values from the page.</li>
+            <li><code>toIsoStringFromLocalInput()</code> converts the date into a standard format.</li>
+            <li><code>JSON.stringify()</code> converts the JavaScript object into JSON text.</li>
+            <li><code>fetch('/api/journals/', ...)</code> sends it to Django.</li>
+            <li>The serializer parses the datetime.</li>
+            <li>The model saves the row in the database.</li>
+        </ol>
+
+        <p>Read flow:</p>
+        <ol>
+            <li><code>loadJournals()</code> sends a GET request.</li>
+            <li>Django returns only the logged-in user's journals.</li>
+            <li><code>renderJournalList()</code> builds the sidebar UI.</li>
+            <li>Clicking an item loads its data back into the editor.</li>
+        </ol>
+
+        <h2>Why JSON Is Used</h2>
+        <p>JSON is not the database. JSON is just the format used to send structured data between the browser and Django over HTTP.</p>
+
+        <pre><code>{
+  "journal_title": "My day",
+  "journal_description": "&lt;p&gt;Hello&lt;/p&gt;",
+  "journal_date": "2026-04-08T09:30:00.000Z"
+}</code></pre>
+
+        <p>So the rule is simple:</p>
+        <ul>
+            <li>JavaScript creates the object</li>
+            <li>JSON carries it over the network</li>
+            <li>Django saves it in models</li>
+        </ul>
+
+        <h2>JavaScript Functions</h2>
+
+        <h3><code>getCookie(name)</code></h3>
+        <p><strong>Why:</strong> Django requires a CSRF token for POST and DELETE requests.</p>
+        <p><strong>How:</strong> It reads <code>document.cookie</code>, finds <code>csrftoken</code>, and sends it in request headers.</p>
+
+        <h3><code>toDateTimeLocalValue(dateValue)</code></h3>
+        <p><strong>Why:</strong> The API returns an ISO datetime, but <code>datetime-local</code> expects a browser-style local value.</p>
+        <p><strong>How:</strong> It creates a <code>Date</code>, adjusts for timezone offset, and returns <code>YYYY-MM-DDTHH:mm</code>.</p>
+
+        <h3><code>toIsoStringFromLocalInput(dateValue)</code></h3>
+        <p><strong>Why:</strong> The browser input is local time, while the API should receive a clean ISO timestamp. If the field is blank, current time should be used.</p>
+        <p><strong>How:</strong> It returns <code>new Date().toISOString()</code> when blank, otherwise converts the chosen local time into ISO UTC text.</p>
+
+        <h3><code>resetEditor()</code></h3>
+        <p><strong>Why:</strong> Needed when creating a fresh journal.</p>
+        <p><strong>How:</strong> Clears the title, clears the date, clears the editor, and removes the selected journal id.</p>
+
+        <h3><code>renderJournalList(journals)</code></h3>
+        <p><strong>Why:</strong> API data must become clickable UI.</p>
+        <p><strong>How:</strong> Builds sidebar items, adds click events, and loads selected journal values back into the form.</p>
+
+        <h3><code>loadJournals(searchValue = '')</code></h3>
+        <p><strong>Why:</strong> Loads journals on page open and refreshes them after save or delete.</p>
+        <p><strong>How:</strong> Builds the API URL, calls <code>fetch()</code>, parses JSON with <code>response.json()</code>, and passes the result to <code>renderJournalList()</code>.</p>
+
+        <h3><code>deleteJournal(journalId)</code></h3>
+        <p><strong>Why:</strong> Removes a saved journal.</p>
+        <p><strong>How:</strong> Confirms with the user, sends a <code>DELETE</code> request, and reloads the list.</p>
+
+        <h3><code>saveData()</code></h3>
+        <p><strong>Why:</strong> This is the main save function.</p>
+        <p><strong>How:</strong> Reads values from the DOM, validates title, builds a JavaScript object, converts it with <code>JSON.stringify()</code>, and sends it to Django with <code>fetch()</code>.</p>
+
+        <h2>Authentication In Your Project</h2>
+        <p>Authentication means: <em>who is the user?</em></p>
+        <p>Django handles this in <code>dreamproject/views.py</code> using:</p>
+        <ul>
+            <li><code>User.objects.create_user(...)</code> for signup</li>
+            <li><code>authenticate(...)</code> to verify credentials</li>
+            <li><code>login(request, user)</code> to create a session</li>
+            <li><code>logout(request)</code> to end the session</li>
+        </ul>
+
+        <p>After login, Django stores the session and gives you <code>request.user</code> on later requests.</p>
+
+        <h2>Authorization In Your Project</h2>
+        <p>Authorization means: <em>what is this user allowed to do?</em></p>
+        <p>You are enforcing that in two places:</p>
+        <ul>
+            <li><code>@login_required(login_url='index')</code> protects the journal page.</li>
+            <li><code>permission_classes = [IsAuthenticated]</code> protects the journal API.</li>
+        </ul>
+
+        <p>The ownership rule is:</p>
+        <pre><code>Journal_uploaded.objects.filter(owner=self.request.user)</code></pre>
+        <p>That means each user only sees their own journals.</p>
+
+        <p>And on create:</p>
+        <pre><code>serializer.save(owner=self.request.user)</code></pre>
+        <p>That means the logged-in user becomes the owner automatically, which is the correct approach.</p>
+
+        <h2>CSRF Protection</h2>
+        <p>Your frontend reads the CSRF token from cookies and sends it as <code>X-CSRFToken</code> for save and delete requests. Django's CSRF middleware checks that token before allowing the action.</p>
+
+        <h2>Resources</h2>
+        <ul>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">MDN Fetch API</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify">MDN JSON.stringify()</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">MDN Date</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">MDN toISOString()</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/datetime-local">MDN datetime-local</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener">MDN addEventListener()</a></li>
+            <li><a href="https://www.django-rest-framework.org/api-guide/fields/">DRF fields</a></li>
+            <li><a href="https://www.django-rest-framework.org/api-guide/serializers/">DRF serializers</a></li>
+            <li><a href="https://docs.djangoproject.com/en/5.2/ref/models/fields/">Django model fields</a></li>
+            <li><a href="https://docs.djangoproject.com/en/5.2/ref/csrf/">Django CSRF</a></li>
+        </ul>
+
+        <h2>Small Practice Projects</h2>
+        <ol>
+            <li>Notes app</li>
+            <li>Task manager</li>
+            <li>Expense tracker</li>
+            <li>Movie watchlist</li>
+            <li>Journal with edit history</li>
+        </ol>
+    </main>
+</body>
+</html>

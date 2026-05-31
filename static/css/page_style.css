@@ -1,0 +1,293 @@
+body
+{
+    background:black;
+    background-image: url("flower.png");
+    color: rgb(255, 28, 96);
+}
+.container
+{
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+.side_bar
+{
+    display: flex;
+    flex-direction: column;
+   width: 25%;
+   height:100vh;
+   align-items: flex-start;
+   margin-left: -100px;
+   border-right: rgba(255, 255, 255, 0.514) solid 0.5px;
+   gap:8px;
+   
+}
+.side_header
+{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+}
+.search_bar
+{
+    background-color: rgba(240, 248, 255, 0.13);
+    height:auto;
+    width: 200px;
+    border-radius: 15px;
+    padding: 5px;
+    accent-color: rgb(5, 2, 131);
+    box-shadow: 5px 5px 5px rgb(5, 2, 131);
+    font-family: 'Cookie', cursive;
+    font-size: 20px;
+}
+.logout_btn
+{
+    text-decoration: none;
+    color: white;
+    background-color: rgb(5, 2, 131);
+    border-radius: 15px;
+    padding: 8px 16px;
+    margin-bottom: 15px;
+}
+.logout_btn:hover
+{
+    background-color: rgb(5, 2, 160);
+    box-shadow: inset 0px 0px 5px rgb(11, 62, 190);
+}
+.journal_list
+{
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(240, 248, 255, 0.2);
+    color:rgb(5, 2, 131);
+    gap: 10px;
+    width: 100%;
+    max-width: 220px;
+    margin-top: 20px;
+    max-height: 70vh;
+   overflow-y: auto;
+    padding-right: 6px;
+}
+.journal_list_item
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    background-color: rgba(240, 248, 255, 0.13);
+    border: rgb(5, 2, 131);
+    border-radius: 14px;
+    padding: 10px 12px;
+    color: rgba(5,2,131);
+    box-shadow: inset 0px 0px 5px rgb(5, 2, 131);
+    backdrop-filter: blur(6px);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.journal_list_item:hover
+{
+    background-color: rgba(240, 248, 255, 0.2);
+    transform: translateX(3px);
+    box-shadow: inset 0px 0px 8px rgb(5, 2, 131);
+}
+.journal_open_btn
+{
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+.journal_delete_btn
+{
+    background-color: rgba(95, 4, 30, 0.9);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.journal_card_title
+{
+    font-family: 'Cookie', cursive;
+    font-size: 24px;
+    font-weight: 400;
+    color: rgb(5, 2, 131);
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty_state
+{
+    margin-top: 10px;
+    color: rgba(5, 2, 131);
+    font-size: 15px;
+}
+.side_btn
+{
+    padding: 0;
+    background-color: transparent;
+    color: rgb(5, 2, 131);
+    font-size: 30px;
+    cursor: pointer;
+    border:none;
+    outline:none;
+    box-shadow: none;
+    align-items: center;
+    justify-content: center;
+}
+.side_btn:focus,
+.side_btn:focus-visible
+{
+    outline: none;
+    box-shadow: none;
+}
+.create_entry_button
+{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    font-size: 30px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+    color: rgb(5, 2, 131);
+    appearance: none;
+    -webkit-appearance: none;
+}
+.side_header p
+{
+    margin: 0;
+    line-height: 1;
+}
+.create_entry_button:hover,
+.create_entry_button:focus,
+.create_entry_button:focus-visible
+{
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: rgb(5, 2, 160);
+}
+.main_content
+{
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    align-items: flex-start;
+    margin-left: 50px;
+}
+.entry_content
+{
+    display: flex;
+    flex-direction: column;
+    font-family: 'Cookie', cursive;
+    margin-top:60px;
+    background-color: rgba(240, 248, 255, 0.13);
+    height: 400px;
+}
+.entry_text
+{
+    padding: 10px;
+    font-size: 40px;
+    border: none;
+    resize: vertical;
+    background-color: rgba(240, 248, 255, 0.11);
+    color:black;
+    font-family: 'Cookie', cursive;
+    width: 900px;
+    height: 500px;
+        border-radius: 0px 0px 15px 15px;
+        box-shadow: inset
+         0px 0px 5px rgb(5, 2, 131);
+    
+}
+.entry_title
+{
+    padding: 10px;
+    font-size: 30px;
+    height:50px;
+    border: rgb(5, 2, 131);
+    box-shadow: inset 0px 3px 5px rgb(5, 2, 131);
+    background-color: rgba(240, 248, 255, 0.075);
+    color:black;
+    border-radius: 15px 15px 0px 0px;
+}
+  
+
+.entry_date
+{
+    padding: 10px;
+    font-size: 25px;
+    height:70px;
+    border-radius: 0%;
+    height: 30px;
+    border: rgb(5, 2, 131);
+    box-shadow: inset 0px 0px 3px rgb(5, 2, 131);
+    background-color: rgba(240, 248, 255, 0.096);
+    
+}
+.save_btn
+{
+ background-color: rgb(5, 2, 131);
+ color: whitesmoke;
+ font-family: 'Cookie',cursive;
+ font-size:20px;
+ border-radius: 15px;
+ width: 50px;
+ height: 30px;
+ margin-top: 600px;
+ align-items: top;
+}
+.save_btn:hover
+{
+    background-color: rgb(5, 2, 160);
+    box-shadow: inset 0px 0px 5px rgb(11, 62, 190);
+}
+#toolbar
+{
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+    background-color: rgb(5, 2, 131);
+    padding: 5px;
+    border-radius: 15px;
+    font-size: 30px;
+    margin-left:220px;
+    position: sticky;
+   top: 10px;
+   z-index: 10;
+}
+#toolbar .ql-stroke {
+  stroke: white;   /* for icons */
+}
+
+#toolbar .ql-fill {
+  fill: white;     /* for filled icons */
+}
+
+#toolbar button {
+  color: white;
+}
+#toolbar .ql-picker-label {
+  color: white;    /* for dropdown labels */
+}
+#toolbar .ql-picker-options .ql-picker-item{
+  color: rgb(5,2,131);    /* for dropdown items */
+}
+.ql-font-poppins { font-family: 'Poppins', sans-serif; }
+.ql-font-roboto { font-family: 'Roboto', sans-serif; }
+.ql-font-playfair { font-family: 'Playfair Display', serif; }
+.ql-font-lobster { font-family: 'Lobster', serif; }
+.ql-font-montserrat { font-family: 'Montserrat', sans-serif; }

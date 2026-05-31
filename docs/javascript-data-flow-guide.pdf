@@ -1,0 +1,816 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 2243 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(JavaScript Data Flow Guide For This Journal App) Tj
+T*
+() Tj
+T*
+(Project references) Tj
+T*
+(- templates/page.html lines 103, 129, 144, 157, 165, 205, 226, 254, 295, 299) Tj
+T*
+(- journals/serializers.py) Tj
+T*
+(- journals/models.py) Tj
+T*
+() Tj
+T*
+(1. Big picture) Tj
+T*
+() Tj
+T*
+(The JavaScript in templates/page.html exists to connect three layers:) Tj
+T*
+(1\) the browser UI,) Tj
+T*
+(2\) the HTTP API,) Tj
+T*
+(3\) Django database saving.) Tj
+T*
+() Tj
+T*
+(The browser does not save journals to the database by itself. It only collects values from) Tj
+T*
+(the page and sends them to Django. Django and Django REST Framework validate the incoming) Tj
+T*
+(data and save it through the serializer and model.) Tj
+T*
+() Tj
+T*
+(The flow for saving is:) Tj
+T*
+(- The user types a title, picks a date, and writes content in Quill.) Tj
+T*
+(- saveData\(\) reads those values from the DOM.) Tj
+T*
+(- toIsoStringFromLocalInput\(\) converts the date input to a standard ISO string.) Tj
+T*
+(- JSON.stringify\(\) turns the JavaScript object into JSON text.) Tj
+T*
+(- fetch\('/api/journals/', { method: 'POST', ... }\) sends the request to Django.) Tj
+T*
+(- The serializer parses journal_date as a DateTimeField.) Tj
+T*
+(- The model stores the row in the database.) Tj
+T*
+() Tj
+T*
+(The flow for reading is:) Tj
+T*
+(- loadJournals\(\) sends a GET request to /api/journals/.) Tj
+T*
+(- Django returns only journals for the logged-in user.) Tj
+T*
+(- renderJournalList\(\) turns that response into clickable journal items.) Tj
+T*
+(- Clicking one item loads its values back into the editor.) Tj
+T*
+() Tj
+T*
+(2. Why JSON is used here) Tj
+T*
+() Tj
+T*
+(JSON is not the database. JSON is just the transport format used between JavaScript and) Tj
+T*
+(Django over HTTP.) Tj
+T*
+() Tj
+T*
+(Without JSON, the frontend would still need some format to send structured data like:) Tj
+T*
+(- journal_title) Tj
+T*
+(- journal_description) Tj
+T*
+(- journal_date) Tj
+T*
+() Tj
+T*
+(JSON is a good fit because:) Tj
+T*
+(- browsers work with JavaScript objects naturally,) Tj
+T*
+(- Django REST Framework parses JSON well,) Tj
+T*
+(- nested and structured data stays readable,) Tj
+T*
+(- it is the normal format for APIs.) Tj
+T*
+() Tj
+T*
+(So the rule is:) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Length 2383 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(- JavaScript creates an object,) Tj
+T*
+(- JSON carries that object over the network,) Tj
+T*
+(- Django saves it into models.) Tj
+T*
+() Tj
+T*
+(3. Function by function explanation) Tj
+T*
+() Tj
+T*
+(getCookie\(name\) in page.html line 103) Tj
+T*
+(Why it exists:) Tj
+T*
+(- Django protects POST and DELETE requests with CSRF.) Tj
+T*
+(- If the frontend sends data without the CSRF token, Django may reject the request.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It reads document.cookie.) Tj
+T*
+(- It finds the cookie named csrftoken.) Tj
+T*
+(- It returns the token so fetch\(\) can send it in the headers.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It is part of secure writing, not part of journal content itself.) Tj
+T*
+(- The save and delete requests depend on it.) Tj
+T*
+() Tj
+T*
+(toDateTimeLocalValue\(dateValue\) in page.html line 129) Tj
+T*
+(Why it exists:) Tj
+T*
+(- A datetime-local input expects a local browser-style value like YYYY-MM-DDTHH:mm.) Tj
+T*
+(- The API usually returns an ISO datetime.) Tj
+T*
+(- Those two formats are related but not identical in usage.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It builds a Date from the API value.) Tj
+T*
+(- It shifts by the browser timezone offset.) Tj
+T*
+(- It returns a string trimmed to minutes so the datetime-local input can display it.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- Without conversion, the saved timestamp may display incorrectly when a journal is) Tj
+T*
+(  reopened.) Tj
+T*
+(- This function is about display formatting, not database persistence.) Tj
+T*
+() Tj
+T*
+(toIsoStringFromLocalInput\(dateValue\) in page.html line 144) Tj
+T*
+(Why it exists:) Tj
+T*
+(- HTML datetime-local gives a local date and time with no timezone marker.) Tj
+T*
+(- APIs and backends are usually happier with a standard ISO 8601 timestamp.) Tj
+T*
+(- If the user leaves the field blank, you wanted the current date and time to be sent.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- If the field is empty, it returns new Date\(\).toISOString\(\).) Tj
+T*
+(- If the field has a value, it creates a Date object from that local value.) Tj
+T*
+(- It then returns date.toISOString\(\), which produces UTC-based ISO text.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It standardizes the payload before it leaves the browser.) Tj
+T*
+(- Django REST Framework can parse ISO datetimes cleanly.) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Length 2246 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(- This reduces ambiguity between browser-local time and server time.) Tj
+T*
+() Tj
+T*
+(Important note:) Tj
+T*
+(- toISOString\(\) always produces UTC with a trailing Z.) Tj
+T*
+(- That means the stored value may look different from the local clock string, but it still) Tj
+T*
+(  represents the same moment in time.) Tj
+T*
+() Tj
+T*
+(resetEditor\(\) in page.html line 157) Tj
+T*
+(Why it exists:) Tj
+T*
+(- The app needs a clean state when the user starts a new journal.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- selectedJournalId becomes null.) Tj
+T*
+(- The title and date inputs are cleared.) Tj
+T*
+(- Quill content is reset.) Tj
+T*
+(- Focus moves back into the editor.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It prevents accidental reuse of the previous journal values.) Tj
+T*
+(- It makes the UI state match the user's intention to create a fresh entry.) Tj
+T*
+() Tj
+T*
+(renderJournalList\(journals\) in page.html line 165) Tj
+T*
+(Why it exists:) Tj
+T*
+(- The API returns data objects, but users need clickable UI.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It maps each journal object into sidebar HTML.) Tj
+T*
+(- It attaches click listeners to open buttons.) Tj
+T*
+(- It attaches click listeners to delete buttons.) Tj
+T*
+(- On open, it copies the selected journal data into the title, date, and editor fields.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It is the bridge from JSON response data back into visible UI state.) Tj
+T*
+(- It also keeps selectedJournalId so the page knows which journal is being viewed.) Tj
+T*
+() Tj
+T*
+(loadJournals\(searchValue = ''\) in page.html line 205) Tj
+T*
+(Why it exists:) Tj
+T*
+(- The page should load journals when it opens and refresh the list after saves or deletes.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It builds the URL.) Tj
+T*
+(- If there is search text, it adds ?search=...) Tj
+T*
+(- It uses fetch\(\) to request the journals list.) Tj
+T*
+(- It converts the response with response.json\(\).) Tj
+T*
+(- It hands the parsed array to renderJournalList\(\).) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It is the read path from Django to the browser.) Tj
+T*
+(- This is where the app asks the server for the current user's data.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 1943 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(deleteJournal\(journalId\) in page.html line 226) Tj
+T*
+(Why it exists:) Tj
+T*
+(- Users need a way to remove saved journals.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It asks for confirmation.) Tj
+T*
+(- It sends a DELETE request to /api/journals/<id>/.) Tj
+T*
+(- If the deleted item is currently open, it clears the editor.) Tj
+T*
+(- It reloads the list.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It is a write operation against the backend.) Tj
+T*
+(- The frontend asks; Django actually performs the deletion.) Tj
+T*
+() Tj
+T*
+(saveData\(\) in page.html line 254) Tj
+T*
+(Why it exists:) Tj
+T*
+(- This is the main save pipeline.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- Reads title from #journal_title.) Tj
+T*
+(- Reads date from #journal_date.) Tj
+T*
+(- Reads HTML content from quill.root.innerHTML.) Tj
+T*
+(- Validates that title is not empty.) Tj
+T*
+(- Builds a plain JavaScript object.) Tj
+T*
+(- Converts it into JSON with JSON.stringify\(\).) Tj
+T*
+(- Sends it to /api/journals/ using fetch\(\).) Tj
+T*
+(- Parses the response JSON.) Tj
+T*
+(- Reloads the sidebar list after success.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It is the central handoff point from browser state to server persistence.) Tj
+T*
+(- It decides what exact payload is sent.) Tj
+T*
+() Tj
+T*
+(The payload shape is essentially:) Tj
+T*
+({) Tj
+T*
+(  "journal_title": "...",) Tj
+T*
+(  "journal_description": "<p>...</p>",) Tj
+T*
+(  "journal_date": "2026-04-08T09:30:00.000Z") Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+(searchInput.addEventListener\('input', ...\) in page.html line 295) Tj
+T*
+(Why it exists:) Tj
+T*
+(- Search should feel live instead of requiring a submit button.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- Every time the input changes, loadJournals\(\) is called with the current text.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It changes which subset of server data is requested and displayed.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Length 2133 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(createEntryButton.addEventListener\('click', resetEditor\) in page.html line 299) Tj
+T*
+(Why it exists:) Tj
+T*
+(- Clicking the plus button should start a new entry immediately.) Tj
+T*
+() Tj
+T*
+(How it works:) Tj
+T*
+(- It attaches the click event directly to the button.) Tj
+T*
+(- When clicked, resetEditor\(\) runs.) Tj
+T*
+() Tj
+T*
+(Why this matters for data:) Tj
+T*
+(- It changes frontend state only.) Tj
+T*
+(- It does not save until saveData\(\) sends a request.) Tj
+T*
+() Tj
+T*
+(4. How the data should ideally be handled) Tj
+T*
+() Tj
+T*
+(Good separation looks like this:) Tj
+T*
+(- Frontend responsibility: collect input, present UI, send requests, render responses.) Tj
+T*
+(- Serializer responsibility: validate and normalize incoming data.) Tj
+T*
+(- Model responsibility: define the database shape and defaults.) Tj
+T*
+(- View responsibility: connect request, serializer, permissions, and queryset filtering.) Tj
+T*
+() Tj
+T*
+(That is the reason your current stack is reasonable:) Tj
+T*
+(- JavaScript should not write to SQLite or PostgreSQL directly.) Tj
+T*
+(- Django should stay responsible for database writes.) Tj
+T*
+() Tj
+T*
+(5. Why I changed the date handling the way I did) Tj
+T*
+() Tj
+T*
+(Earlier, the model used auto_now_add or a server-side always-now behavior. That caused) Tj
+T*
+(user-selected dates to be ignored.) Tj
+T*
+() Tj
+T*
+(The improved idea is:) Tj
+T*
+(- If the frontend sends a date, keep it.) Tj
+T*
+(- If the frontend sends nothing, fall back to now.) Tj
+T*
+() Tj
+T*
+(This is cleaner because:) Tj
+T*
+(- the user can intentionally choose a journal date,) Tj
+T*
+(- empty input still works,) Tj
+T*
+(- the serializer can parse ISO 8601 cleanly,) Tj
+T*
+(- the model keeps a safe default.) Tj
+T*
+() Tj
+T*
+(This is also close to real-world practice:) Tj
+T*
+(- clients send structured values,) Tj
+T*
+(- servers validate them,) Tj
+T*
+(- servers apply defaults if fields are missing.) Tj
+T*
+() Tj
+T*
+(6. Design notes and tradeoffs) Tj
+T*
+() Tj
+T*
+(Why use fetch\(\)?) Tj
+T*
+(- It is the built-in browser API for HTTP requests.) Tj
+T*
+(- It keeps the frontend lightweight.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 2215 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(Why use response.json\(\)?) Tj
+T*
+(- The API returns JSON.) Tj
+T*
+(- The browser must parse that response text into JavaScript values before the page can use) Tj
+T*
+(  it.) Tj
+T*
+() Tj
+T*
+(Why use addEventListener\(\)?) Tj
+T*
+(- It keeps behavior attached to events clearly.) Tj
+T*
+(- It is more flexible than old inline event patterns.) Tj
+T*
+() Tj
+T*
+(Why use helper functions instead of doing everything inside saveData\(\)?) Tj
+T*
+(- Smaller functions are easier to debug.) Tj
+T*
+(- Date formatting logic can be reused.) Tj
+T*
+(- The code becomes easier to reason about.) Tj
+T*
+() Tj
+T*
+(7. Things to improve next in this app) Tj
+T*
+() Tj
+T*
+(Good next improvements:) Tj
+T*
+(- Use PUT or PATCH when editing an existing journal instead of always POSTing a new one.) Tj
+T*
+(- Store Quill Delta as well if you need richer editor history.) Tj
+T*
+(- Show created_at and updated_at separately from the user-chosen journal date.) Tj
+T*
+(- Add better error messages under form fields instead of only alert\(\).) Tj
+T*
+(- Convert the inline script into a separate static JavaScript file for maintainability.) Tj
+T*
+(- Add debouncing to search so it does not fetch on every single keystroke immediately.) Tj
+T*
+() Tj
+T*
+(8. Learning roadmap) Tj
+T*
+() Tj
+T*
+(Learn in this order:) Tj
+T*
+(1\) JavaScript basics: objects, functions, arrays, events.) Tj
+T*
+(2\) The DOM: query selectors, input values, innerHTML, event listeners.) Tj
+T*
+(3\) HTTP basics: GET, POST, DELETE, headers, status codes.) Tj
+T*
+(4\) JSON: stringify and parse.) Tj
+T*
+(5\) Dates and timezones: local time, UTC, ISO 8601.) Tj
+T*
+(6\) Django REST Framework serializers and viewsets.) Tj
+T*
+(7\) Authentication, sessions, and CSRF.) Tj
+T*
+() Tj
+T*
+(9. Small projects to build) Tj
+T*
+() Tj
+T*
+(Project 1: Notes app) Tj
+T*
+(- Title and body fields.) Tj
+T*
+(- Save notes with fetch\(\).) Tj
+T*
+(- List notes from the backend.) Tj
+T*
+(- Delete notes.) Tj
+T*
+() Tj
+T*
+(Project 2: Task manager) Tj
+T*
+(- Task text, due date, completed flag.) Tj
+T*
+(- Filter by completed or pending.) Tj
+T*
+(- Practice JSON payloads and form handling.) Tj
+T*
+() Tj
+T*
+(Project 3: Expense tracker) Tj
+T*
+(- Amount, category, note, datetime.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 1959 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(- Learn date parsing and totals.) Tj
+T*
+() Tj
+T*
+(Project 4: Movie watchlist) Tj
+T*
+(- Title, status, rating, watched_at.) Tj
+T*
+(- Practice update versus create flows.) Tj
+T*
+() Tj
+T*
+(Project 5: Journal with version history) Tj
+T*
+(- Save a journal.) Tj
+T*
+(- Edit it with PATCH.) Tj
+T*
+(- Add a JournalVersion model to store old copies.) Tj
+T*
+() Tj
+T*
+(10. Official resources) Tj
+T*
+() Tj
+T*
+(MDN Fetch API:) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) Tj
+T*
+() Tj
+T*
+(MDN JSON.stringify\(\):) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) Tj
+T*
+() Tj
+T*
+(MDN Date:) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Tj
+T*
+() Tj
+T*
+(MDN Date.prototype.toISOString\(\):) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) Tj
+T*
+() Tj
+T*
+(MDN input datetime-local:) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/datetime-local) Tj
+T*
+() Tj
+T*
+(MDN addEventListener\(\):) Tj
+T*
+(https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) Tj
+T*
+() Tj
+T*
+(Django REST Framework serializer fields:) Tj
+T*
+(https://www.django-rest-framework.org/api-guide/fields/) Tj
+T*
+() Tj
+T*
+(Django REST Framework serializers:) Tj
+T*
+(https://www.django-rest-framework.org/api-guide/serializers/) Tj
+T*
+() Tj
+T*
+(Django model field reference:) Tj
+T*
+(https://docs.djangoproject.com/en/5.2/ref/models/fields/) Tj
+T*
+() Tj
+T*
+(Django CSRF protection:) Tj
+T*
+(https://docs.djangoproject.com/en/5.2/ref/csrf/) Tj
+T*
+() Tj
+T*
+(11. Final takeaway) Tj
+T*
+() Tj
+T*
+(The JavaScript in this page is not replacing Django. It is preparing data, sending it) Tj
+T*
+(safely, and rendering server responses. The backend is still the source of truth for) Tj
+T*
+(validation, ownership, permissions, and database saving.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Pages /Kids [10 0 R 11 0 R 12 0 R 13 0 R 14 0 R 15 0 R 16 0 R] /Count 7 >>
+endobj
+10 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+11 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>
+endobj
+12 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+13 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 5 0 R >>
+endobj
+14 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+15 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 7 0 R >>
+endobj
+16 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 8 0 R >>
+endobj
+17 0 obj
+<< /Type /Catalog /Pages 9 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000002380 00000 n 
+0000004815 00000 n 
+0000007113 00000 n 
+0000009108 00000 n 
+0000011293 00000 n 
+0000013560 00000 n 
+0000015571 00000 n 
+0000015671 00000 n 
+0000015798 00000 n 
+0000015925 00000 n 
+0000016052 00000 n 
+0000016179 00000 n 
+0000016306 00000 n 
+0000016433 00000 n 
+0000016560 00000 n 
+trailer
+<< /Size 18 /Root 17 0 R >>
+startxref
+16610
+%%EOF

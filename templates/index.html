@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journaling by shreya</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Cookie&display=swap" rel="stylesheet">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italianno&display=swap" rel="stylesheet">
+</head>
+<body >
+   <h1 style="font-family: 'Cookie' ,cursive ; text-align: center; font-size: 40px;">JournalBuddy</h1>
+     <div class="login_page">
+         <h2>Login</h2> 
+      {% if error %}
+      <p class="form_message">{{ error }}</p>
+      {% endif %}
+      <form method="post" autocomplete="off">
+      {% csrf_token %}
+      <div class="login">     
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" placeholder="Enter your username" value="{{ entered_username|default:'' }}" autocomplete="off">
+      <label for="email">Email:</label>   
+      <input type="email" id="email" name="email" placeholder="Enter your email" value="{{ entered_email|default:'' }}" autocomplete="off">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" spellcheck="false">
+
+      </div> <br>
+      <div class="action_buttons">
+      <button type="submit" name="action" value="login" action="login">Login</button>
+      <button type="submit" name="action" value="signup" action="signup">Sign Up</button>
+      <button type="reset">Cancel</button>
+      </div>
+      </form>
+     </div>
+     <script>
+      const passwordInput = document.getElementById('password');
+
+      function clearPasswordField() {
+        passwordInput.value = '';
+      }
+
+      window.addEventListener('load', clearPasswordField);
+      window.addEventListener('pageshow', clearPasswordField);
+     </script>
+</body>
+</html>
