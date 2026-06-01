@@ -27,11 +27,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS =[]
+ALLOWED_HOSTS =["journaling-app-vfzf.onrender.com"]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://yourdomain.railway.app",  # baad mein update karenge
-]
+
 # Application definition
 
 INSTALLED_APPS = [
