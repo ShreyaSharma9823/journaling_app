@@ -18,7 +18,7 @@ from dreamproject import views
 from django.contrib import admin
 from django.urls import include, path
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('nikallojaldicbsekiwebsitesochihaikya/', admin.site.urls),
     path('', views.index, name='index'),
     path('page/', views.page, name='page'),
     path('guide/', views.guide, name='guide'),
