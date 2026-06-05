@@ -23,7 +23,7 @@ JournalBuddy is a personal journaling web app where your thoughts stay yours. Bu
 | Layer | Technology |
 |-------|-----------|
 | Backend | Django 5, Django REST Framework |
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Frontend | HTML5, CSS3, JavaScript |
 | Text Editor | Quill.js |
 | Database | PostgreSQL |
 | Auth | JWT (Session-based) |
